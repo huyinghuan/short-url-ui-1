@@ -5,6 +5,7 @@ export default class index extends Component {
     render() {
         const dataSource = [
             {
+                key:'1',
                 edit:'编辑',
                 short: "https://d.imgo.tv/U", 
                 url: "http://www.mgtv.com/imexpireURL", 
@@ -63,7 +64,7 @@ export default class index extends Component {
                     </Form.Item>
                 </Form>
                 <Divider orientation='left'>生成短链列表</Divider>
-                <Table dataSource={dataSource} columns={columns} />;
+                <Table dataSource={dataSource} columns={columns} />
             </div>
         )
     }
