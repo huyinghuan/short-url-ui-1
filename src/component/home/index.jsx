@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Layout, Menu } from 'antd';
+import { Layout, Menu} from 'antd';
 import {
   FileTextOutlined,
   SearchOutlined,
@@ -12,18 +12,19 @@ import {Route, Switch, Link, withRouter} from 'react-router-dom';
 import ShortQuery from '../short-query'
 import AppQuery from '../app-query'
 import Third from '../third'
+import Edit from '../short/edit'
 import './index.scss'
 const { Header, Content, Footer, Sider } = Layout;
+const { SubMenu } = Menu;
 class index extends Component {
     constructor(props){
         super(props)
-        this.state = {
+        // this.state = {
             
-        };
+        // };
         console.log(props);
     }
-    
-    
+
 
     menuClick(item){
         let queue = [this.props.match.path]
@@ -57,25 +58,24 @@ class index extends Component {
                         <Menu.Item key="third" icon={<KeyOutlined />}>
                             <Link to='/third'>第三方API Token申请</Link>
                         </Menu.Item>
-                        
                     </Menu>
                 </Sider>
                 <Layout className="site-layout">
                     <Header className="site-layout-background" style={{ padding: 0 }}>
-                        <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['2']}>
-                            <Menu.Item key="1">nav 1</Menu.Item>
-                            <Menu.Item key="2">nav 2</Menu.Item>
-                            <Menu.Item key="3">nav 3</Menu.Item>
-                        </Menu>
+                    <Menu mode="horizontal" theme="dark" style={{float:"right"}}>
+                        <SubMenu title="注销">
+                        </SubMenu>
+                    </Menu>
                     </Header>
                         <Content style={{ margin: '0 16px' }}>
                             <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
-                            {/* <Short /> */}
                             <Switch>
-                                <Route path='/short' component={Short} />
-                                <Route path='/short-query' component={ShortQuery} />
-                                <Route path='/app-query' component={AppQuery} />
-                                <Route path='/third' component={Third} />
+                                <Route exact path='/short' component={Short} />
+                                <Route exact path='/short/:id' component={Edit} />
+                                <Route exact path='/short-query' component={ShortQuery} />
+                                <Route exact path='/app-query' component={AppQuery} />
+                                <Route exact path='/third' component={Third} />
+                                
                             </Switch>
                             </div>
                         </Content>
@@ -85,4 +85,4 @@ class index extends Component {
         )
     }
 }
-export default index
+export default withRouter(index)
