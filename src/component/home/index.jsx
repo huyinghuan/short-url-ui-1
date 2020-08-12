@@ -13,6 +13,7 @@ import ShortQuery from '../short-query'
 import AppQuery from '../app-query'
 import Third from '../third'
 import Edit from '../short/edit'
+import ThirdEdit from '../third/edit'
 import './index.scss'
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -75,6 +76,7 @@ class index extends Component {
                                 <Route exact path='/short-query' component={ShortQuery} />
                                 <Route exact path='/app-query' component={AppQuery} />
                                 <Route exact path='/third' component={Third} />
+                                <Route exact path='/third/:app_id' component={ThirdEdit} />
                                 
                             </Switch>
                             </div>

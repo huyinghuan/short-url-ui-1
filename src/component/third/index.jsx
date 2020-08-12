@@ -1,56 +1,99 @@
 import React, { Component } from 'react'
-import { Form, Input, Button,Divider,Table } from 'antd';
-export default class index extends Component {
+import { Form, Input, Button,Divider,Table, notification } from 'antd';
+import {get} from '../../service/index'
+import {FormOutlined} from '@ant-design/icons';
+import {withRouter} from 'react-router'
+class index extends Component {
+    constructor(props){
+        super(props)
+        this.state={
+            dataSource:[],
+            page:{
+                index: 1,
+                pageSize: 15,
+                total: 7,
+                pageTotal: 1
+            },
+            loading:true
+        }
+        this.LoadData()
+    }
+    columns = [
+        {
+          title: '应用名称',
+          dataIndex: 'app_name',
+          key: 'app_name',
+          align:'center'
+        },
+        {
+          title: 'Token',
+          dataIndex: 'token',
+          key: 'token',
+        },
+        {
+          title: '域名白名单',
+          dataIndex: 'blank_list',
+          key: 'blank_list',
+          align:'center'
+        },
+        {
+            title: '操作',
+            dataIndex: 'action',
+            key: 'action',
+            render:(text, record)=>{
+                let Href = [this.props.location.pathname, record.id].join("/");
+                return (
+                    <div>
+                        <Button icon={<FormOutlined />} type="link" onClick={()=>{this.goto(Href,record)}}>编辑</Button>
+                    </div>
+                )
+            },
+            align:'center'
+        },
+    ];
+    goto(href,record){
+        this.props.history.push(href)  
+    }
+    LoadData(){
+        get(`/token`, {method:"GET"}).then((data)=>{
+            let token_list = data.data
+            token_list.forEach(item=>{
+                item.key = item.id
+            })
+
+            this.setState({dataSource:token_list,page:data.page,loading:false})
+        }).catch((e)=>{
+            console.log(e);
+        })
+    }
+    onFinish(val){
+        get(`/token`,{method:'POST'},val).then(()=>{
+            notification.success({
+                message: '操作成功',
+                placement: 'topRight',
+                duration: 3,
+            });
+            this.LoadData()
+        }).catch((e)=>{
+
+        })
+    }
     render() {
-        const dataSource = [
-            {
-                key:'1',
-                edit:'编辑',
-                short: "https://d.imgo.tv/U", 
-                url: "http://www.mgtv.com/imexpireURL", 
-                user_id:'test',
-                user_id:'1',
-                app_name:'name'
-            }
-        ]
-        const columns = [
-            {
-              title: '应用名称',
-              dataIndex: 'edit',
-              key: 'edit',
-            },
-            {
-              title: 'Token',
-              dataIndex: 'short',
-              key: 'short',
-            },
-            {
-              title: '域名白名单',
-              dataIndex: 'url',
-              key: 'url',
-            },
-            {
-                title: '操作',
-                dataIndex: 'user_id',
-                key: 'user_id',
-            },
-          ];
         return (
             <div>
                 <Form 
                     layout="inline"
                     name="basic"
-                    // onFinish={onFinish}
-                    // onFinishFailed={onFinishFailed}
+                    onFinish={this.onFinish.bind(this)}
                 >
                     <Form.Item
-                        name="AppName"
+                        name="app_name"
                         rules={[{ required: true, message: 'Please input your AppName!' }]}
                     >
                         <Input style={{ width: 200}} placeholder='应用名称' />
                     </Form.Item>
                     <Form.Item
-                        name="URL"
+                        name="blank_list"
                         rules={[{ required: true, message: 'Please input your URL!' }]}
                     >
                         <Input style={{ width: 600}} placeholder='长链域名白名单 多个用逗号 , 分开，非白名单域名禁止生成短链,如: m.mgtv.com'/>
@@ -62,9 +105,21 @@ export default class index extends Component {
                         </Button>
                     </Form.Item>
                 </Form>
-                <Divider orientation='left'>生成应用列表</Divider>
-                <Table dataSource={dataSource} columns={columns} />
+                <Divider orientation='left'>应用列表</Divider>
+                <Table 
+                    loading={this.state.loading}
+                    dataSource={this.state.dataSource} 
+                    columns={this.columns} 
+                    pagination={{
+                        // defaultPageSize: 15,
+                        // showSizeChanger: true,
+                        total: this.state.page.total,
+                        // pageSizeOptions:[10, 20, 50]
+                    }}
+                    // onChange={this.OnChange.bind(this)} 
+                />
             </div>
         )
     }
 }
+export default withRouter(index)

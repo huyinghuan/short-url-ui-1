@@ -26,13 +26,11 @@ class index extends Component {
             let render_data = FormatData(data.data)
             this.setState({dataSource:render_data,page:data.page,loading:false})
         }).catch((e)=>{
-            console.log(e);
+            this.setState({loading: false})
         })
     }
     goto(href,record){
-        console.log(href);
         this.props.history.push(href)  
-        console.log(record);      
     }
     columns = [
         {
@@ -42,7 +40,6 @@ class index extends Component {
             width:150,
             align:'center',
             render:(text, record)=>{
-                console.log();
                 let Href = [this.props.location.pathname, record.id].join("/");
                 
                 return (

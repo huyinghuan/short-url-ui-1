@@ -1,15 +1,29 @@
 import React, { Component } from 'react'
-import { Form, Input, Button,Divider,Table,Select} from 'antd';
+import { Form, Input, Button,Divider,Table,Select,notification,InputNumber,Popconfirm } from 'antd';
 import { get } from '../../service/index';
+import {DeleteOutlined} from '@ant-design/icons';
 const { Option } = Select;
 export default class edit extends Component {
     constructor(props){
         super(props)
-        this.state = {
-            dataSource:[]
-        }
-        console.log(props);
         this.LoadData()
+        this.state = {
+            dataSource:[],
+            List:[]
+        }
+        // console.log(props);
+        this.loadList()
+    }
+    loadList(){
+        get(`/short/${this.props.match.params.id}/tag`, {method:"GET"}).then((data)=>{
+            console.log(data);
+            data.forEach(item=>{
+                item.key = item.id
+            })
+            this.setState({List:data})
+        }).catch((e)=>{
+            console.log(e);
+        })
     }
     LoadData(){
         let id = this.props.match.params.id
@@ -20,22 +34,22 @@ export default class edit extends Component {
             console.log(e);
         })
     }
-    dataSource = [
-        {
-            key:'1',
-            edit:'编辑',
-            short: "https://d.imgo.tv/U", 
-            url: "http://www.mgtv.com/imexpireURL", 
-            user_id:'test',
-            user_id:'1',
-            app_name:'name'
-        }
-    ]
+    del(id){
+        get(`/short/${this.props.match.params.id}/tag/${id}`,{ method: "DELETE" }).then(()=>{
+            notification.success({
+                message: '操作成功',
+                placement: 'topRight',
+                duration: 3,
+            });
+            this.loadList()
+        })
+    }
     columns = [
         {
             title: '描述',
-            key:"describe",
-            dataIndex: 'describe',
+            key:"desc",
+            dataIndex: 'desc',
+            align:'center'
         },
         {
             title: 'URL',
@@ -44,47 +58,108 @@ export default class edit extends Component {
         },
         {
           title: '比例',
-          dataIndex: 'ratio',
-          key: 'ratio',
+          dataIndex: 'proportion',
+          key: 'proportion',
+          align:'center'
         },
         {
             title: '操作',
             dataIndex: 'action',
             key: 'action',
+            render:(_,record)=>{
+                let Listid = record.id
+                return(
+                    <Popconfirm placement="topLeft" title="确认删除?" onConfirm={()=>{this.del(record.id)}} okText="Yes" cancelText="No">
+                        <Button danger icon={<DeleteOutlined />} type="link"  >删除</Button>
+                    </Popconfirm>
+                )
+            },
+            align:'center'
         },
 
     ];
+    onFinish(val){
+        console.log(val);
+        let id = this.props.match.params.id
+        switch(val.params){
+            case '禁用':
+                val.params = ''
+                break;
+            case 'UserAgent':
+                val.params = 'ua'
+                break;
+            default:
+                val.params = 'ip'
+                break;
+            
+        }
+        let v = {
+            id:id,
+            url:val.url,
+            params:val.params,
+            status: true
+        }
+        get(`/short/${id}`,{method:'PUT'},v).then(()=>{
+            notification.success({
+                message: '操作成功',
+                placement: 'topRight',
+                duration: 3,
+            });
+        }).catch((e)=>{
+
+        })
+    }
+    onChange(val){
+        console.log(val);
+    }
+
+    descFinish(val){
+        get(`/short/${this.props.match.params.id}/tag`,{method:'POST'},val).then(()=>{
+            notification.success({
+                message: '操作成功',
+                placement: 'topRight',
+                duration: 3,
+            });
+            this.loadList()
+        }).catch((e)=>{
+
+        })
+
+    }
+    
     render() {
+        const url = this.state.dataSource.url
         return (
             <div>
                 <Form 
                     layout="inline"
                     name="basic"
-                    // onFinish={onFinish}
+                    onFinish={this.onFinish.bind(this)}
                     // onFinishFailed={onFinishFailed}
                 >
                     <Form.Item
                         // initialValue={}
                         name="short"
-                        // rules={[{ required: true, message: 'Please input the url!' }]}
+                        rules={[{ required: true, message: 'Please input the short-url!' }]}
                     >
-                        <Input style={{ width: 200}} readOnly="readonly" placeholder={this.state.dataSource.short}/>
+                        <Input style={{ width: 200}}  placeholder={this.state.dataSource.short}/>{/*readOnly="readonly"*/ }
                     </Form.Item>
                     <Form.Item
-                        initialValue={this.state.dataSource.url}
+                        initialValue={url}
+                        // resetFields={this.reset(initialValue)}
                         name="url"
                         rules={[{ required: true, message: 'Please input the url!' }]}
                     >
-                        <Input style={{ width: 300}} />
+                        <Input style={{ width: 600}} placeholder={url}/>
                     </Form.Item>
-                    <Form.Item  label='分流'>
+                    <Form.Item  label='分流' rules={[{ required: true }]} name='params'>
                     <Select
-                    
-                        placeholder="Select "
+                        placeholder="Select"
+                        onChange={this.onChange}
                         style={{ width: 120, margin: '0 8px' }}
                     >
-                        <Option value="forbi">禁用</Option>
-                        <Option value="IP">IP</Option>
+                        <Option value="禁用" >禁用</Option>
+                        <Option value="ip">IP</Option>
                         <Option value="UserAgent">UserAgent</Option>
                     </Select>
                     </Form.Item>
@@ -94,7 +169,7 @@ export default class edit extends Component {
                         </Button>
                     </Form.Item>
                     <Form.Item>
-                        <Button type="primary" htmlType="submit">
+                        <Button type="primary" onClick={()=>{}}>
                             应用
                         </Button>
                     </Form.Item>
@@ -103,12 +178,12 @@ export default class edit extends Component {
                 <Form 
                     layout="inline"
                     name="basic"
-                    // onFinish={onFinish}
+                    onFinish={this.descFinish.bind(this)}
                     // onFinishFailed={onFinishFailed}
                 >
                     <Form.Item
-                        name="short"
-                        rules={[{ required: true, message: 'Please input the url!' }]}
+                        name="desc"
+                        rules={[{ required: true, message: 'Please make some descriptions!' }]}
                     >
                         <Input style={{ width: 200}} placeholder='描述'/>
                     </Form.Item>
@@ -118,6 +193,18 @@ export default class edit extends Component {
                     >
                         <Input style={{ width: 300}} placeholder='url' />
                     </Form.Item>
+                    <Form.Item
+                        name="proportion"
+                    >
+                       <InputNumber
+                            defaultValue={0}
+                            min={0}
+                            max={100}
+                            formatter={value => `${value}%`}
+                            parser={value => value.replace('%', '')}
+                            // onChange={onChange}
+                        />
+                    </Form.Item>
                     <Form.Item>
                         <Button type="primary" htmlType="submit">
                             保存
@@ -125,7 +212,7 @@ export default class edit extends Component {
                     </Form.Item>
                 </Form>
                 <Divider></Divider>
-                <Table dataSource={this.dataSource} columns={this.columns} />
+                <Table dataSource={this.state.List} columns={this.columns} />
             </div>
         )
     }
