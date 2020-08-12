@@ -9,7 +9,6 @@ export default class index extends Component {
             short: "https://d.imgo.tv/U", 
             url: "http://www.mgtv.com/imexpireURL", 
             user_id:'test',
-            user_id:'1',
             app_name:'name'
         }
     ]

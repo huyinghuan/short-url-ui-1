@@ -9,10 +9,7 @@ class index extends Component {
         this.state={
             dataSource:[],
             page:{
-                index: 1,
-                pageSize: 15,
-                total: 7,
-                pageTotal: 1
+                
             },
             loading:true
         }
@@ -110,12 +107,7 @@ class index extends Component {
                     loading={this.state.loading}
                     dataSource={this.state.dataSource} 
                     columns={this.columns} 
-                    pagination={{
-                        // defaultPageSize: 15,
-                        // showSizeChanger: true,
-                        total: this.state.page.total,
-                        // pageSizeOptions:[10, 20, 50]
-                    }}
+                    
                     // onChange={this.OnChange.bind(this)} 
                 />
             </div>

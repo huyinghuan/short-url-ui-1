@@ -4,18 +4,22 @@ import { get } from '../../service/index';
 import {DeleteOutlined} from '@ant-design/icons';
 const { Option } = Select;
 export default class edit extends Component {
+    formRef = React.createRef();
     constructor(props){
         super(props)
-        this.LoadData()
         this.state = {
-            dataSource:[],
-            List:[]
+            dataSource:{},
+            List:[],
+           
         }
-        // console.log(props);
         this.loadList()
     }
+    componentDidMount(){
+        this.LoadData()
+
+    }
     loadList(){
-        get(`/short/${this.props.match.params.id}/tag`, {method:"GET"}).then((data)=>{
+        get(`/short/${this.props.match.params.id}/tag`, {method:"GEListidT"}).then((data)=>{
             console.log(data);
             data.forEach(item=>{
                 item.key = item.id
@@ -28,8 +32,7 @@ export default class edit extends Component {
     LoadData(){
         let id = this.props.match.params.id
         get(`/short/${id}`, {method:"GET"}).then((data)=>{
-            console.log(data);
-            this.setState({dataSource:data})
+            this.formRef.current.setFieldsValue(data)
         }).catch((e)=>{
             console.log(e);
         })
@@ -67,7 +70,6 @@ export default class edit extends Component {
             dataIndex: 'action',
             key: 'action',
             render:(_,record)=>{
-                let Listid = record.id
                 return(
                     <Popconfirm placement="topLeft" title="确认删除?" onConfirm={()=>{this.del(record.id)}} okText="Yes" cancelText="No">
                         <Button danger icon={<DeleteOutlined />} type="link"  >删除</Button>
@@ -128,7 +130,7 @@ export default class edit extends Component {
     }
     
     render() {
-        const url = this.state.dataSource.url
+        // const url = this.state.dataSource.url
         return (
             <div>
                 <Form 
@@ -136,21 +138,20 @@ export default class edit extends Component {
                     name="basic"
                     onFinish={this.onFinish.bind(this)}
                     // onFinishFailed={onFinishFailed}
+                    ref={this.formRef}
+                    initialValues={this.state.dataSource}
                 >
                     <Form.Item
-                        // initialValue={}
                         name="short"
                         rules={[{ required: true, message: 'Please input the short-url!' }]}
                     >
-                        <Input style={{ width: 200}}  placeholder={this.state.dataSource.short}/>{/*readOnly="readonly"*/ }
+                        <Input style={{ width: 200}} readOnly="readonly" />
                     </Form.Item>
                     <Form.Item
-                        initialValue={url}
-                        // resetFields={this.reset(initialValue)}
                         name="url"
                         rules={[{ required: true, message: 'Please input the url!' }]}
                     >
-                        <Input style={{ width: 600}} placeholder={url}/>
+                        <Input style={{ width: 600}} />
                     </Form.Item>
                     <Form.Item  label='分流' rules={[{ required: true }]} name='params'>
                     <Select
@@ -197,7 +198,6 @@ export default class edit extends Component {
                         name="proportion"
                     >
                        <InputNumber
-                            defaultValue={0}
                             min={0}
                             max={100}
                             formatter={value => `${value}%`}
