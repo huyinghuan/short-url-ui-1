@@ -1,30 +1,28 @@
 import React, { Component } from 'react'
-import { Form, Input, Button,Divider,Table,Typography} from 'antd';
-import {FormOutlined} from '@ant-design/icons';
-import { get } from '../../service/index';
-import {FormatData} from '../../assets/js/FormatData'
-const { Paragraph } = Typography;
+import { Form, Input, Button, Divider, Table, Space } from 'antd';
+import { FormOutlined } from '@ant-design/icons';
+import { fetchAPI } from '../../service/index';
 
 export default class index extends Component {
-    constructor(props){
+    constructor(props) {
         super(props)
         this.state = {
-            dataSource:[],
-            loading:true
+            dataSource: [],
+            loading: true
         }
     }
     columns = [
         {
             title: '操作',
-            key:"edit",
-            dataIndex: 'edit',
-            width:150,
-            align:'center',
-            render:(text, record)=>{
+            key: "edit",
+            align: 'center',
+            width: 150,
+            render: (text, record) => {
+                let href = [this.props.location.pathname, record.short_id].join("/");
                 return (
-                    <div>
-                        <Button icon={<FormOutlined />} type="link" onClick={()=>{this.goto()}}>编辑</Button>
-                    </div>
+                    <Space size="middle">
+                        <Button icon={<FormOutlined />} type="link" onClick={() => { this.goto(href, record) }}>编辑</Button>
+                    </Space>
                 )
             }
         },
@@ -32,63 +30,47 @@ export default class index extends Component {
             title: '短链',
             dataIndex: 'short',
             key: 'short',
-            width:300,
-            align:'center',
-            render:(val,record,index)=>{
-                return(
-                <Paragraph copyable>{val}</Paragraph>
-
-                )
-            }
+            width: 300,
+            align: 'center'
         },
         {
             title: 'URL',
             dataIndex: 'url',
             key: 'url',
-            // textWrap: 'word-break',
             ellipsis: true,
         },
         {
             title: '用户',
             dataIndex: 'user_id',
             key: 'user_id',
-            width:150,
-            align:'center'
-        },
-        {
-            title: '应用',
-            dataIndex: 'app_name',
-            key: 'app_name',
-            width:150,
-            align:'center'
+            width: 150,
+            align: 'center'
         },
     ];
-    query(url){
-        get(`/short/query/any?url=${url}`, {method:"GET"}).then((data)=>{
-            console.log(FormatData(data));
-            this.setState({dataSource:FormatData(data),loading:false})
-        }).catch((e)=>{
+    query(url) {
+        fetchAPI(`/short/query/any?url=${url}`, { method: "GET" }).then((data) => {
+            this.setState({ dataSource: data.data, loading: false })
+        }).catch((e) => {
             console.log(e);
         })
     }
-    onFinish(val){
+    onFinish(val) {
         this.query(val.url)
         // console.log(val.url);
     }
     render() {
         return (
             <div>
-                <Form 
+                <Form
                     layout="inline"
                     name="basic"
                     onFinish={this.onFinish.bind(this)}
-                    // onFinishFailed={onFinishFailed}
                 >
                     <Form.Item
                         name="url"
                         rules={[{ required: true, message: 'Please input your url!' }]}
                     >
-                        <Input style={{ width: 600}} placeholder='URL'/>
+                        <Input style={{ width: 600 }} placeholder='URL' />
                     </Form.Item>
 
                     <Form.Item>
@@ -98,7 +80,7 @@ export default class index extends Component {
                     </Form.Item>
                 </Form>
                 <Divider orientation='left'>查询结果</Divider>
-                <Table dataSource={this.state.dataSource} columns={this.columns} />
+                <Table dataSource={this.state.dataSource} columns={this.columns} rawKey="short_id" />
             </div>
         )
     }
